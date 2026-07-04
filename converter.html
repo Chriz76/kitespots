@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitespot SEO HTML Generator</title>
+    <title>Kitespot SEO HTML Generator v5 - Click-Overlay Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center p-6">
 
     <div class="max-w-3xl w-full bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
-        <h1 class="text-2xl font-black text-sky-400 mb-2">🪁 Kitespot HTML-Seiten Generator</h1>
+        <h1 class="text-2xl font-black text-sky-400 mb-2">🪁 Kitespot HTML Generator (Click-Overlay Edition)</h1>
         <p class="text-sm text-slate-400 mb-6">
-            Füge deine 100 CSV-Zeilen unten ein. Der Browser generiert daraus statische, SEO-optimierte HTML-Seiten inklusive passgenauer iFrame-Verlinkung und packt sie in eine ZIP-Datei.
+            Füge deine CSV-Zeilen unten ein. Jede generierte Seite enthält nun ein interaktives iFrame mit einem Klick-Overlay, das die App bei Berührung direkt im Vollbildmodus in einem neuen Tab öffnet.
         </p>
 
         <div class="mb-4">
@@ -22,18 +22,17 @@
 
         <div class="mb-6">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">CSV-Inhalt (inklusive Header-Zeile):</label>
-            <textarea id="csvInput" rows="12" placeholder="id;slug;name;lat;lon;metaTitle;metaDescription;headline;description;windInfo;safetyInfo&#10;1;fehmarn-altenteil;Fehmarn - Altenteil;54.5122;11.1044;..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 whitespace-pre"></textarea>
+            <textarea id="csvInput" rows="12" placeholder="id;slug;name;lat;lon;metaTitle;metaDescription;headline;description;windInfo;safetyInfo" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 whitespace-pre"></textarea>
         </div>
 
-        <button id="generateBtn" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-sky-900/30 flex items-center justify-center gap-2">
-            🚀 HTML-Seiten generieren & als ZIP herunterladen
+        <button id="generateBtn" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+            🚀 HTML-Seiten mit Klick-Overlay generieren
         </button>
 
         <div id="status" class="mt-4 text-center text-sm font-medium hidden"></div>
     </div>
 
     <script>
-        // Das exakt gleiche HTML-Template, das wir für die Seiten nutzen
         function generateHtmlTemplate(spot, appUrl) {
             const iframeUrl = `${appUrl}?lat=${spot.lat}&lon=${spot.lon}`;
             
@@ -52,7 +51,31 @@
     <meta property="og:url" content="${appUrl}spots/${spot.slug}.html">
     <script src="https://cdn.tailwindcss.com"><\/script>
     <style>
-        .iframe-container { position: relative; width: 100%; height: 650px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 0.75rem; overflow: hidden; }
+        /* Der Container hält das iFrame und das Overlay zusammen */
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        /* Das unsichtbare Overlay legt sich exakt über die Karte */
+        .iframe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0); /* Unsichtbar */
+            transition: background 0.2s ease;
+        }
+        /* Ein dezenter visueller Effekt beim Drüberfahren, der signalisiert: Klick mich! */
+        .iframe-wrapper:hover .iframe-overlay {
+            background: rgba(14, 165, 233, 0.04); /* Ganz zarter Sky-Blau-Schimmer */
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -61,26 +84,39 @@
             <a href="/" class="font-bold text-xl text-sky-600">🪁 ICON-D2 KiteWeather</a>
         </div>
     </header>
+    
     <main class="max-w-6xl mx-auto px-4 py-8">
         <nav class="text-xs text-slate-400 mb-4">Home &gt; Kitespots &gt; <span class="text-slate-600 font-medium">${spot.name}</span></nav>
+        
         <header class="mb-8">
             <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">${spot.headline}</h1>
             <div class="flex flex-wrap gap-4 text-xs text-slate-500 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
                 <div><strong>📍 Koordinaten:</strong> Lat: ${spot.lat} | Lon: ${spot.lon}</div>
-                <div><strong>📊 Wettermodell:</strong> DWD ICON-D2 (2.2km Grid)</div>
+                <div><strong>📊 Modell:</strong> DWD ICON-D2 RUC (2.1km Grid)</div>
+                <div><strong>🔄 Update:</strong> Stündlich (Rapid Update Cycle)</div>
             </div>
         </header>
+
         <section id="map" class="mb-12">
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-900 mb-3">Interaktiver ICON-D2 Windreport & HD-Karten-Overlay</h2>
-                <div class="iframe-container bg-slate-100">
-                    <iframe src="${iframeUrl}" width="100%" height="100%" style="border:none;" allow="geolocation" loading="lazy"></iframe>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <h2 class="text-lg font-bold text-slate-900">Interaktiver ICON-D2 Windreport</h2>
+                    <span class="text-xs font-semibold bg-sky-100 text-sky-700 px-2 py-1 rounded-md animate-pulse">
+                        🖱️ Klicken zum Öffnen im Vollbildmodus
+                    </span>
+                </div>
+                
+                <div class="iframe-wrapper bg-slate-100">
+                    <a href="${iframeUrl}" target="_blank" rel="noopener" class="iframe-overlay" title="Hier klicken, um die interaktive Windkarte im Vollbildmodus zu öffnen"></a>
+                    
+                    <iframe src="${iframeUrl}" width="100%" height="100%" style="border:none;" loading="lazy"></iframe>
                 </div>
             </div>
         </section>
-        <section id="details" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <section id="details" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="md:col-span-2">
-                <article class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <article class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full">
                     <h2 class="text-xl font-bold text-slate-900 mb-4 border-b pb-2">Revierbeschreibung & Bedingungen</h2>
                     <p class="text-slate-600 leading-relaxed">${spot.description}</p>
                 </article>
@@ -96,8 +132,65 @@
                 </div>
             </div>
         </section>
+
+        <section id="technical-specs" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-8 mb-8">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 mb-4 border-b pb-2">Zusatzinformationen & Modell-Details</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Dies ist der hochpräzise Datenreport für Grundwind, Böen und Windrichtung an dem Kitespot <strong>${spot.name}</strong>. 
+                    Während gängige Mainstream-Wetter-Apps meist globale Modelle mit grober Auflösung und trägen Update-Zyklen rendern, visualisiert diese Anwendung das absolute Premium-Lokalmodell des Deutschen Wetterdienstes: das <strong>ICON-D2 RUC (Rapid Update Cycle)</strong>.
+                    Das interaktive Karten-Overlay nutzt zudem eine maßgeschneiderte Farbskala, die speziell auf die für Kite- und Wingfoiler relevanten Velocity-Ranges optimiert ist. Nach aktuellem Kenntnisstand handelt es sich hierbei um eine einzigartige, kostenfreie Implementierung, die stündlich aktualisierte, interaktive Point-Forecast-Abfragen direkt aus dem ICON-D2 RUC bereitstellt.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse border border-slate-200 rounded-lg overflow-hidden text-sm">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <th class="p-3">Parameter</th>
+                            <th class="p-3 text-sky-600">ICON-D2 RUC</th>
+                            <th class="p-3 text-slate-500">Standard Global Models (z.B. GFS)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-600">
+                        <tr>
+                            <td class="p-3 font-medium text-slate-900">Horizontale Auflösung</td>
+                            <td class="p-3 bg-sky-50/50 font-semibold text-sky-700">2.1 km Grid</td>
+                            <td class="p-3">13 km – 27 km Grid</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium text-slate-900">Update-Zyklus</td>
+                            <td class="p-3 bg-sky-50/50 font-semibold text-sky-700">Stündlich (Alle 60 Minuten)</td>
+                            <td class="p-3">Alle 6 Stunden</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium text-slate-900">Daten-Assimilation</td>
+                            <td class="p-3 bg-sky-50/50 font-semibold text-sky-700">Rapid Update Cycle (RUC) <span class="block text-xs font-normal text-slate-500">(Kontinuierlicher Abgleich lokaler Radar- & Stationsdaten)</span></td>
+                            <td class="p-3">Intermittierende Batch-Assimilation</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium text-slate-900">Vorhersage-Reichweite</td>
+                            <td class="p-3 bg-sky-50/50 font-semibold text-sky-700">0 bis 14 Stunden</td>
+                            <td class="p-3">Mehrtägiger Langzeit-Trend</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide text-xs mb-2 text-sky-600">Direkter Nutzen für den Spot ${spot.name}:</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Mikroklimatische Verschiebungen, lokale Thermiksysteme sowie topographische Düseneffekte an Binnenseen oder Küstenabschnitten gehen in grobmaschigen Netzen (>10 km) komplett verloren. Die ultra-feine <strong>2.1-km-Auflösung</strong> des ICON-D2 RUC Modells fängt diese thermodynamischen Besonderheiten präzise ein. Das stündliche Update der Windstärke, der maximalen Böen und der Richtungsvektoren stellt sicher, dass taktische Windfenster-Vorhersagen für deine Foiling-Session hochaktuell bleiben.
+                </p>
+            </div>
+
+            <div class="text-[11px] text-slate-400 italic bg-amber-50/50 border border-amber-100 p-3 rounded-lg">
+                ⚠️ <strong>Disclaimer:</strong> Dieses Projekt ist experimentell und befindet sich in aktiver Weiterentwicklung. Die Daten dienen der sportlichen Orientierung; Sicherheitsentscheidungen auf dem Wasser sollten stets auf Basis offizieller Seewetterberichte getroffen werden.
+            </div>
+        </section>
     </main>
-    <footer class="bg-slate-900 text-slate-400 text-xs py-8 mt-16 text-center">&copy; 2026 ICON-D2 KiteWeather.</footer>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-8 mt-16 text-center">&copy; 2026 ICON-D2 KiteWeather. Alle Rechte vorbehalten.</footer>
 </body>
 </html>`;
         }
@@ -112,19 +205,17 @@
                 return;
             }
 
-            // Sicherstellen, dass die App-URL mit einem / endet
             if (!appUrl.endsWith('/')) appUrl += '/';
 
             statusDiv.classList.remove('hidden', 'text-emerald-400', 'text-red-400');
             statusDiv.classList.add('text-sky-400');
-            statusDiv.innerText = 'Verarbeite Daten und erstelle ZIP...';
+            statusDiv.innerText = 'Verarbeite Daten und generiere HTML-Seiten mit Vollbild-Trigger...';
 
             try {
                 const zip = new JSZip();
                 const lines = csvText.split('\n');
                 let count = 0;
 
-                // Ab Zeile 1 starten, um die Header-Zeile (Zeile 0) zu überspringen
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
@@ -147,26 +238,22 @@
                     };
 
                     const htmlContent = generateHtmlTemplate(spot, appUrl);
-                    // Datei im ZIP-Ordner platzieren
                     zip.file(`${spot.slug}.html`, htmlContent);
                     count++;
                 }
 
                 if (count === 0) {
-                    throw new Error('Keine gültigen Zeilen zum Verarbeiten gefunden. Format geprüft (getrennt durch Semikolon)?');
+                    throw new Error('Keine gültigen Zeilen gefunden. Trennung per Semikolon prüfen!');
                 }
 
-                // Generiere das fertige ZIP im Browser-Speicher
                 const content = await zip.generateAsync({ type: 'blob' });
-                
-                // Automatischer Download Trigger
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
-                link.download = 'kitespots_seo_pages.zip';
+                link.download = 'kitespots_overlay_seo_pages.zip';
                 link.click();
 
                 statusDiv.classList.replace('text-sky-400', 'text-emerald-400');
-                statusDiv.innerText = `🎉 Erfolgreich! ${count} HTML-Seiten generiert und als 'kitespots_seo_pages.zip' heruntergeladen.`;
+                statusDiv.innerText = `🎉 Hervorragend! ${count} Seiten mit klickbarem iFrame-Overlay heruntergeladen.`;
 
             } catch (err) {
                 statusDiv.classList.replace('text-sky-400', 'text-red-400');
