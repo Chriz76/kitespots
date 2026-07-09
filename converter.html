@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitespot SEO Master Generator v7</title>
+    <title>Kitespot SEO Master Generator v7.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-center items-center p-6">
 
     <div class="max-w-3xl w-full bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
-        <h1 class="text-2xl font-black text-sky-400 mb-2">🪁 Kitespot SEO Master Generator (v7)</h1>
+        <h1 class="text-2xl font-black text-sky-400 mb-2">🪁 Kitespot SEO Master Generator (v7.1)</h1>
         <p class="text-sm text-slate-400 mb-6">
-            Füge deine CSV-Zeilen ein. Dieses Tool generiert das komplette Paket. Auf den einzelnen Spot-Seiten sind nun die Breadcrumbs sowie ein Footer-Link zurück zur `index.html` Übersicht integriert.
+            Füge deine CSV-Zeilen ein. Dieses Tool generiert das komplette Paket inklusive einer automatischen `privacy.html`, die auf jeder Unterseite im Footer verlinkt ist.
         </p>
 
         <div class="mb-4">
@@ -33,7 +33,7 @@
     </div>
 
     <script>
-        // TEMPLATE 1: Einzelne Spot-Seite mit Back-Links
+        // TEMPLATE 1: Einzelne Spot-Seite mit Back-Links & Privacy im Footer
         function generateSpotTemplate(spot, appUrl) {
             const iframeUrl = `${appUrl}?lat=${spot.lat}&lon=${spot.lon}`;
             return `<!DOCTYPE html>
@@ -123,12 +123,20 @@
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 text-xs py-6 text-center mt-16">&copy; 2026 ICON-D2 KiteWeather.</footer>
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 text-center mt-16">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>&copy; 2026 ICON-D2 KiteWeather.</div>
+            <div class="flex gap-4">
+                <a href="./index.html" class="hover:underline hover:text-slate-200">Kitespots</a>
+                <a href="./privacy.html" class="hover:underline hover:text-slate-200">Privacy & Contact</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>`;
         }
 
-        // TEMPLATE 2: index.html Übersichtsseite (Unverändert gut)
+        // TEMPLATE 2: index.html Übersichtsseite (Mit Privacy im Footer)
         function generateIndexTemplate(spots, appUrl) {
             const spotsJson = JSON.stringify(spots.map(s => ({ name: s.name, headline: s.headline, slug: s.slug })));
             return `<!DOCTYPE html>
@@ -158,7 +166,17 @@
         <div id="spotGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
         <div id="noResults" class="text-center text-slate-400 mt-12 hidden">Keine Spots unter diesem Namen gefunden.</div>
     </main>
-    <footer class="bg-slate-900 text-slate-400 text-xs py-8 text-center mt-12">&copy; 2026 ICON-D2 KiteWeather.</footer>
+    
+    <footer class="bg-slate-900 text-slate-400 text-xs py-8 text-center mt-12">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>&copy; 2026 ICON-D2 KiteWeather.</div>
+            <div class="flex gap-4">
+                <a href="./index.html" class="hover:underline hover:text-slate-200">Kitespots</a>
+                <a href="./privacy.html" class="hover:underline hover:text-slate-200">Privacy & Contact</a>
+            </div>
+        </div>
+    </footer>
+
     <script>
         const spots = ${spotsJson};
         const searchBar = document.getElementById('searchBar');
@@ -194,11 +212,77 @@
 </html>`;
         }
 
-        // TEMPLATE 3: sitemap.xml (Unverändert gut)
+        // NEW TEMPLATE 4: privacy.html (Eigenständige Infoseite in ansprechendem Tailwind-Design)
+        function generatePrivacyTemplate(appUrl) {
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy & Project Info - ICON-D2 KiteWeather</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="${appUrl}" class="font-bold text-xl text-sky-600">🪁 ICON-D2 KiteWeather</a>
+            <a href="./index.html" class="text-sm font-medium text-slate-600 hover:text-sky-600 transition">&larr; Kitespots</a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12 flex-grow w-full">
+        <article class="bg-white p-8 md:p-10 rounded-2xl border border-slate-200 shadow-sm prose max-w-none">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-6">About this Project & Contact</h1>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                This project is a private, free, and ad-free open-source wind web app and kitespot nformation page. It is maintained strictly for hobby use and pursues no commercial interests. The forecasts and spot descriptions might be wrong. Always check the real conditions.
+            </p>
+            <p class="text-slate-600 leading-relaxed mb-6">
+                The source code is fully transparent and publicly available on GitHub. If you have any questions, feedback, or suggestions, feel free to open an issue on GitHub or contact me directly via email.
+            </p>
+            
+            <ul class="space-y-2 text-sm text-slate-600 mb-10 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <li><strong>Developer & Code:</strong> https://github.com/Chriz76</li>
+            </ul>
+
+            <hr class="border-slate-200 my-8">
+
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Privacy Policy</h2>
+            <p class="text-slate-600 leading-relaxed mb-4">
+                Because your privacy matters, this web app does not collect, store, or track any of your personal data. We do not use any marketing or tracking cookies, and there is no user registration required.
+            </p>
+            <p class="text-slate-600 leading-relaxed mb-6">
+                However, to provide this web app in a stable, secure, and fast manner, we rely on modern cloud infrastructure. Due to technical requirements, a minimal amount of data processing occurs automatically in the background:
+            </p>
+
+            <h3 class="text-lg font-bold text-slate-900 mt-6 mb-2">1. Hosting via GitHub Pages</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                This web app is hosted as a static site on GitHub Pages (Service Provider: GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA; Parent Company: Microsoft Corporation). When you access this app, GitHub automatically collects standard server log files (including your IP address, browser type, and the date and time of access). This is technically necessary to deliver the page securely and to prevent cyber attacks. GitHub/Microsoft is certified under the EU-US Data Privacy Framework, ensuring a GDPR-compliant level of data protection.
+            </p>
+
+            <h3 class="text-lg font-bold text-slate-900 mt-6 mb-2">2. Security & Content Delivery Network via Cloudflare</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                Additionally, we use the Content Delivery Network (CDN) provided by Cloudflare (Service Provider: Cloudflare Inc., 101 Townsend St, San Francisco, CA 94107, USA). Cloudflare acts as a security shield between our host server and your browser. During this process, your IP address is briefly processed to block malicious traffic (e.g., DDoS attacks) and to optimize page loading speeds globally. Cloudflare may set technically necessary cookies for security purposes, which do not create user profiles. Cloudflare is also certified under the EU-US Data Privacy Framework.
+            </p>
+
+            <p class="text-xs text-slate-400 bg-slate-50 p-3 rounded-lg">
+                <strong>Legal Basis:</strong> The use of these third-party services is based on our legitimate interest (Art. 6 Abs. 1 lit. f GDPR) to offer this hobby project in a secure, high-performing, and reliable manner on the internet.
+            </p>
+        </article>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 text-center">
+        &copy; 2026 ICON-D2 KiteWeather. All rights reserved.
+    </footer>
+</body>
+</html>`;
+        }
+
+        // TEMPLATE 3: sitemap.xml (Inklusive privacy.html für besseres SEO-Crawling)
         function generateSitemapTemplate(spots, appUrl) {
             let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
             xml += `  <url>\n    <loc>${appUrl}</loc>\n    <changefreq>hourly</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
             xml += `  <url>\n    <loc>${appUrl}spots/index.html</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+            xml += `  <url>\n    <loc>${appUrl}spots/privacy.html</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.3</priority>\n  </url>\n`;
             spots.forEach(spot => {
                 xml += `  <url>\n    <loc>${appUrl}spots/${spot.slug}.html</loc>\n    <changefreq>hourly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
             });
@@ -221,7 +305,7 @@
 
             statusDiv.classList.remove('hidden', 'text-emerald-400', 'text-red-400');
             statusDiv.classList.add('text-sky-400');
-            statusDiv.innerText = 'Generiere SEO-Paket inklusive internen Verlinkungen...';
+            statusDiv.innerText = 'Generiere SEO-Paket inklusive internen Verlinkungen und Privacy-Page...';
 
             try {
                 const zip = new JSZip();
@@ -254,25 +338,32 @@
                     throw new Error('Keine gültigen CSV-Zeilen gefunden.');
                 }
 
+                // 1. Generiere Spot-Seiten
                 spotsArray.forEach(spot => {
                     const htmlContent = generateSpotTemplate(spot, appUrl);
                     zip.file(`${spot.slug}.html`, htmlContent);
                 });
 
+                // 2. Generiere index.html
                 const indexContent = generateIndexTemplate(spotsArray, appUrl);
                 zip.file('index.html', indexContent);
 
+                // 3. NEW: Generiere privacy.html und lege sie mit in die ZIP
+                const privacyContent = generatePrivacyTemplate(appUrl);
+                zip.file('privacy.html', privacyContent);
+
+                // 4. Generiere sitemap.xml
                 const sitemapContent = generateSitemapTemplate(spotsArray, appUrl);
                 zip.file('sitemap.xml', sitemapContent);
 
                 const content = await zip.generateAsync({ type: 'blob' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
-                link.download = 'kitespots_complete_seo_package_v7.zip';
+                link.download = 'kitespots_complete_seo_package_v7.1.zip';
                 link.click();
 
                 statusDiv.classList.replace('text-sky-400', 'text-emerald-400');
-                statusDiv.innerText = `🎉 Paket fertig geschnürt! ${spotsArray.length} Spots verlinken nun perfekt untereinander über die 'index.html'.`;
+                statusDiv.innerText = `🎉 Paket fertig geschnürt! ${spotsArray.length} Spots verlinken nun perfekt untereinander und jede Seite besitzt den Link zu 'privacy.html'.`;
 
             } catch (err) {
                 statusDiv.classList.replace('text-sky-400', 'text-red-400');
